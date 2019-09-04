@@ -16,7 +16,7 @@ gulp.task("typedoc", function() {
           exclude: [
             '**/*.test.ts',
           ],
-          out: "doc/",
+          out: "docs/",
           name: "Letter"
       }))
   ;
