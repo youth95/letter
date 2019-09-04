@@ -171,7 +171,7 @@ export function colIndex(w: number, h: number) { return map(i => map(j => pos2in
  * 统计数值数组arr中的相同数组出现的次数,返回一个map
  * @param arr 需要统计的数组
  */
-export function countArray(arr: number[]):Map<number,number> {
+export function countArray(arr: number[]): Map<number, number> {
   const result = new Map();
   for (const v of arr) {
     if (result.has(v)) {
@@ -196,3 +196,15 @@ export function countArray(arr: number[]):Map<number,number> {
 //   // rfs.map(v => [v,range((w-x)*4)]).map(v => );
 
 // }
+
+/**
+ * 判断相等
+ * @param a 需要等于的值
+ */
+export function isEq(a: any) {
+  return function Eq(b: any) {
+    return a === b;
+  }
+}
+
+export const eqT = isEq(true);

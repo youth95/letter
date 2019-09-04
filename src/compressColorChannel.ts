@@ -7,12 +7,7 @@ import { pos2index } from "./utils";
  */
 export type CompressChannelPixel = [number, number];
 
-/**
- * 2d图像点
- * 
- * 由左至右 xy
- */
-export type Point = [number, number];
+
 
 /**
  * 压缩通道
@@ -56,9 +51,9 @@ export function setPoint(compressColorChannel: CompressColorChannel, x: number, 
     throw new Error("setPoint 时数组下标越界");
   }
   const oi = compressColorChannel.ccps.findIndex(item => item[0] === idx);
-  if(oi === -1){
+  if (oi === -1) {
     compressColorChannel.ccps.push([idx, v]);
-  }else{
+  } else {
     compressColorChannel.ccps[oi][1] = v;
   }
 }
@@ -68,15 +63,15 @@ export function setPoint(compressColorChannel: CompressColorChannel, x: number, 
  * @param x 横坐标
  * @param y 纵坐标
  */
-export function getPoint(compressColorChannel: CompressColorChannel, x: number, y: number) : CompressChannelPixel {
+export function getPoint(compressColorChannel: CompressColorChannel, x: number, y: number): CompressChannelPixel {
   const idx = pos2index(x, y, compressColorChannel.width);
   if (idx > compressColorChannel.width * compressColorChannel.height) {
     throw new Error("setPoint 时数组下标越界");
   }
   const oi = compressColorChannel.ccps.findIndex(item => item[0] === idx);
-  if(oi === -1){
-    return [idx,compressColorChannel.bgc];
-  }else{
+  if (oi === -1) {
+    return [idx, compressColorChannel.bgc];
+  } else {
     return compressColorChannel.ccps[oi];
   }
 }
@@ -129,7 +124,7 @@ export function getPoint(compressColorChannel: CompressColorChannel, x: number, 
  * 8 -> 4 = ceil(x/h) + w*(h-(x%h || h))
  */
 export function piRotateRight(width: number, height: number, idx: number) {
-  return Math.ceil((idx+1) / height) + width * (height - ((idx+1) % height || height)) - 1;
+  return Math.ceil((idx + 1) / height) + width * (height - ((idx + 1) % height || height)) - 1;
 }
 
 /**
