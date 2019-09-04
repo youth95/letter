@@ -5,6 +5,22 @@ const tsify = require("tsify");
 const uglify = require('gulp-uglify');
 const sourcemaps = require('gulp-sourcemaps');
 const buffer = require('vinyl-buffer');
+const typedoc = require("gulp-typedoc");
+
+gulp.task("typedoc", function() {
+  return gulp
+      .src(["src/**/*.ts"])
+      .pipe(typedoc({
+          module: "commonjs",
+          target: "es5",
+          exclude: [
+            '**/*.test.ts',
+          ],
+          out: "doc/",
+          name: "Letter"
+      }))
+  ;
+});
 
 const browserifyOptions = {
   basedir: ".",
