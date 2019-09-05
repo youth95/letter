@@ -58,7 +58,6 @@ export class BitMap extends Element<BitMapInitOptions>{
     }
 
 
-}
 
 export interface PloygonInitOptions {
     path: Path
