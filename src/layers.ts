@@ -15,7 +15,7 @@ export interface Layer {
 
 export interface LayerManagerOptions {
     width: number;
-    hieght: number;
+    height: number;
 }
 
 let autoId = 0;
@@ -43,14 +43,17 @@ export class LayerManager {
     public layerManagerRootDOM: HTMLDivElement;
     private layers: RLayer[] = [];
 
-    constructor(root: Element, option: LayerManagerOptions) {
+    constructor(root: Element, option: LayerManagerOptions = {width:400,height:300}) {
         this.width = option.width;
-        this.height = option.hieght;
+        this.height = option.height;
         // create dom
         this.layerManagerRootDOM = document.createElement("div");   // 顶层
+        this.layerManagerRootDOM.className = 'layer-manager';
         this.layerManagerRootDOM.style.width = `${this.width}px`;
         this.layerManagerRootDOM.style.height = `${this.height}px`;
+        this.layerManagerRootDOM.style.overflow = 'hidden';
         this.layerManagerRootDOM.style.position = 'relative';
+        this.layerManagerRootDOM.style.border = '1px solid #000';
         // clear root
         const childList = root.childNodes;
         for (var i = 0, len = childList.length; i < len; i++) {
