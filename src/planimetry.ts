@@ -1,5 +1,8 @@
 import { eqT, range } from "./utils";
-
+/**
+ * 矩形坐标 x,y,w,h
+ */
+export type RectPos = [number, number, number, number];
 /**
  * 2d图像点
  * 
@@ -133,3 +136,30 @@ export function isConvex(polygon: Polygon): boolean {
     return disList.every(line => isIpsilaterals(line, ...polygon)); // 所有内角均为钝角的多边形为凸多边形
 }
 
+/**
+ * 获取点集合的矩形坐标
+ * @param points 点集合
+ */
+export function getPointsRect(points: Path): RectPos {
+    if (points.length === 0) {
+        return [0, 0, 0, 0];
+    }
+    let minx = points[0][0], miny = points[0][1], maxx = points[0][0], maxy = points[0][1];
+    for (const p of points) {
+        const [x, y] = p;
+        if (x > maxx) {
+            maxx = x;
+        }
+        if (x < minx) {
+            minx = x;
+        }
+        if (y > maxy) {
+            maxy = y;
+        }
+        if (y < miny) {
+            miny = y;
+        }
+    }
+    return [0, 0, Math.abs(minx - maxx), Math.abs(miny - maxy)];
+
+}

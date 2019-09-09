@@ -1,4 +1,4 @@
-import { towPointLine, towPointDis, linefn, isIpsilateral, isInTriangle, isInPolygon, isConvex } from "./planimetry";
+import { towPointLine, towPointDis, linefn, isIpsilateral, isInTriangle, isInPolygon, isConvex, getPointsRect } from "./planimetry";
 
 describe('planimetry', () => {
     it("towPointLine", () => {
@@ -41,36 +41,36 @@ describe('planimetry', () => {
         ], [5, 5])).toEqual(false);
     });
 
-    it('isInPolygon',() => {
+    it('isInPolygon', () => {
         expect(isInPolygon([
             [0, 0],
             [0, 2],
             [2, 0],
             [2, -2],
-        ],[0,0])).toEqual(true);
+        ], [0, 0])).toEqual(true);
         expect(isInPolygon([
             [0, 0],
             [0, 2],
             [2, 0],
             [2, -2],
-        ],[0,-2])).toEqual(false);
-        expect(isInPolygon([
-            [0, 0],
-            [0, 2],
-            [2, 0],
-            [2, -2],
-            [0, -2],
-        ],[0,-2])).toEqual(true);
+        ], [0, -2])).toEqual(false);
         expect(isInPolygon([
             [0, 0],
             [0, 2],
             [2, 0],
             [2, -2],
             [0, -2],
-        ],[10,10])).toEqual(false);
+        ], [0, -2])).toEqual(true);
+        expect(isInPolygon([
+            [0, 0],
+            [0, 2],
+            [2, 0],
+            [2, -2],
+            [0, -2],
+        ], [10, 10])).toEqual(false);
     });
 
-    it('isConvex',() => {
+    it('isConvex', () => {
         expect(isConvex([
             [0, 0],
             [0, 2],
@@ -90,5 +90,12 @@ describe('planimetry', () => {
             [2, -2],
             [0, 2],
         ])).toEqual(false);
-    })
+    });
+
+    it('getPointsRect', () => {
+        expect(getPointsRect([])).toEqual([0, 0, 0, 0]);
+        expect(getPointsRect([[1, 1]])).toEqual([0, 0, 0, 0]);
+        expect(getPointsRect([[1, 1], [1, 2]])).toEqual([0, 0, 0, 1]);
+        expect(getPointsRect([[1, 1], [-2, 3], [2, -7]])).toEqual([0, 0, 4, 10]);
+    });
 });
