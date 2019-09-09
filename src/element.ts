@@ -97,91 +97,40 @@ export class Ploygon extends Element<PloygonInitOptions>{
 
 }
 
-class Polygon extends Element implements IElement {
-    type: CElementType = CElementType.Polygon;
-    public state: CPolygonState = CPolygonState.static;
+export interface PloygonInitOptions {
+    path: Path
+}
 
-    private paths: Path = [];
-    constructor() {
-        super();
-        this.bindEventListener();
-    }
-
-    private bindEventListener() {
-        this.ctx.canvas.addEventListener('contextmenu', e => {
-            if (this.state === CPolygonState.beginDraw) {
-                this.paths.pop();
-                this.paths.pop();
-                this.render();
-                e.stopPropagation();
-                e.preventDefault();
-                this.state = CPolygonState.endDraw;
-                const rc = minExternalReact(this.ctx.getImageData(0, 0, this.ctx.canvas.width, this.ctx.canvas.height));
-                const imgD = this.ctx.getImageData(...rc);
-                this.clear();
-                this.ctx.canvas.width = rc[2];
-                this.ctx.canvas.height = rc[3];
-                this.ctx.putImageData(imgD,0,0);
-                this.move(rc[0],rc[1]);
-            }
-        });
-        this.ctx.canvas.addEventListener('mousedown', e => {
-            const x = e.offsetX - this.ctx.canvas.offsetLeft;
-            const y = e.offsetY - this.ctx.canvas.offsetTop;
-            if (this.state === CPolygonState.beginDraw) {
-                this.paths.push([x, y]);
-                this.render();
-            } else if (this.state === CPolygonState.static) {
-                this.state = CPolygonState.beginDraw;
-                this.paths.push([x, y]);
-                this.render();
-            }
-
-        });
-
-        this.ctx.canvas.addEventListener('mousemove', e => {
-            const x = e.offsetX - this.ctx.canvas.offsetLeft;
-            const y = e.offsetY - this.ctx.canvas.offsetTop;
-            if (this.state === CPolygonState.beginDraw) {
-                if (this.paths.length > 1) {
-                    this.paths.pop();
-                }
-                this.paths.push([x, y]);
-                this.render();
-            }
-        });
-
-    }
-
-    private draw() {
-        this.ctx.beginPath();
-        const plen = this.paths.length;
-        this.ctx.moveTo(...this.paths[0]);
-        for (let i = 1; i < plen; i++) {
-            this.ctx.lineTo(...this.paths[i]);
+export class Ploygon extends Element<PloygonInitOptions>{
+    private canvasPattern: CanvasPattern | null = null;
+    private path: Path | null = null;
+    public init(options: PloygonInitOptions): void | Promise<void> {
+        const ctx = createCanvasContext2d();
+        this.pos = getPointsRect(options.path);
+        ctx.canvas.width = this.pos[2];
+        ctx.canvas.height = this.pos[3];
+        ctx.beginPath();
+        const s = options.path[0];
+        ctx.moveTo(...s);
+        for (const p of options.path) {
+            ctx.lineTo(...p);
         }
-        this.ctx.lineTo(...this.paths[0]);
-        this.ctx.stroke();
-        // this.ctx.fill();
+        ctx.closePath();
+        ctx.stroke();
+        this.path = options.path;
+        this.canvasPattern = ctx.createPattern(ctx.canvas, 'no-repret');
+    }
+    public getCanvasPattern(): CanvasPattern {
+        if (this.canvasPattern === null) {
+            throw new Error('cont create canvas pattern !');
+        }
+        return this.canvasPattern;
+    }
+    public isIn(p: [number, number]): boolean {
+        if (this.path === null)
+            return false;
+        return isInPolygon(this.path, p);
     }
 
-    render(): void {
-        this.clear();
-        this.draw();
-    }
 
-
-}
-
-export interface PolygonEditPanelOptions {
-    width: number;
-    height: number;
-}
-
-export function createPolygonEditPanel(option: PolygonEditPanelOptions): Polygon {
-    const polygon = new Polygon();
-    polygon.ctx.canvas.width = option.width;
-    polygon.ctx.canvas.height = option.height;
-    polygon.ctx.canvas.style.backgroundColor = 'rgba(255,255,255,0.33)';
-    return polygon;
 }
