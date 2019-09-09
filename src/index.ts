@@ -1,5 +1,5 @@
 export * from './image';
 export * from './utils';
 export * from './compressColorChannel';
-export * from './element';
-export * from './layers';
+export * from '../bak/element';
+export * from '../bak/layers';
