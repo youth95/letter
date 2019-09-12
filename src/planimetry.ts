@@ -17,6 +17,10 @@ export type Polygon = Point[];
  * 路径的原始值表示
  */
 export type Path = Polygon;
+/**
+ * 圆 圆心 半径
+ */
+export type Circle = [Point, number];
 
 /**
  * 直线的一般式 A B C
