@@ -1,5 +1,5 @@
-export abstract class Observer<T> {
-  abstract update(nextState: T | null): void;
+export interface Observer<T> {
+  update(nextState: T | null): void;
 }
 export abstract class Subject<T> {
   private observers: Set<Observer<T>> = new Set<Observer<T>>();
