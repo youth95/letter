@@ -58,6 +58,22 @@ const rody = (gap: number): CanvasPattern => {
     return pattern;
 };
 
+const agb = () => {
+    gctx.canvas.height = 16;
+    gctx.canvas.width = 16;
+    gctx.fillStyle = '#aaa';
+    gctx.fillRect(0,0,8,8);
+    gctx.fillRect(8,8,8,8);
+    gctx.fillStyle = '#999';
+    gctx.fillRect(8,0,8,8);
+    gctx.fillRect(0,8,8,8);
+    const pattern = gctx.createPattern(gctx.canvas, 'repeat');
+    if (pattern === null) {
+        throw new Error('cont create canvas pattern !');
+    }
+    return pattern;
+}
+
 
 export function renderXRod(ctx: CanvasRenderingContext2D, gap: number = 4) {
     ctx.fillStyle = '#ffffff';
@@ -71,4 +87,10 @@ export function renderYRod(ctx: CanvasRenderingContext2D, gap: number = 4) {
     ctx.fillRect(0, 0, 8, ctx.canvas.height);
     ctx.fillStyle = rody(gap);
     ctx.fillRect(0, 0, 8, ctx.canvas.height);
+}
+
+export function renderRgba(ctx:CanvasRenderingContext2D){
+    ctx.fillStyle = agb();
+    ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+    
 }

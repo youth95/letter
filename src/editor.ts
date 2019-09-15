@@ -1,6 +1,6 @@
 import { createCanvasContext2d } from "./utils";
-import { Element, BitMap } from "./element";
-import { renderXRod, renderYRod } from "./widget";
+import { Element, BitMap, R, putPath, putPloygon, putCircle } from "./element";
+import { renderXRod, renderYRod, renderRgba } from "./widget";
 import { Path, Polygon, Point, Circle, towPointDis } from "./planimetry";
 
 export interface LayerOptions {
@@ -27,7 +27,7 @@ class Layer implements LayerInfo {
     }
 
     public render(ctx: CanvasRenderingContext2D) {
-        console.log('Layer.render',this.els);
+        console.log('Layer.render', this.els);
         this.els.forEach(item => item.fr(ctx));
     }
 
@@ -55,6 +55,7 @@ export class Editor implements appendShapeAble {
     private static instance: Editor | null = null;
     private static autoLayerId = 0;
     private sceneBackground: BitMap | null = null;
+    private wrap: HTMLDivElement | null = null;
     private constructor() { }
     private ctx = createCanvasContext2d();
     private layersMapper = new Map<number, Layer>();
@@ -62,6 +63,26 @@ export class Editor implements appendShapeAble {
     private sceneHeight: number = 100;
     private isShowRod: boolean = true;
 
+
+    private shapes: R[] = [];
+
+    public mount(root: string) {
+        this.render();
+        const wrap = document.createElement('div');
+        this.wrap = wrap;
+        wrap.style.position = 'relative';
+        wrap.style.fontSize = '0';
+        this.ctx.canvas.style.position = 'absolute';
+        wrap.appendChild(this.ctx.canvas);
+        const rdom = document.getElementById(root);
+        if (rdom) {
+            rdom.appendChild(wrap);
+        }
+    }
+
+    /**
+     * 获取编辑器实例
+     */
     public static getInstance(): Editor {
         if (this.instance === null)
             this.instance = new Editor();
@@ -85,7 +106,8 @@ export class Editor implements appendShapeAble {
     public render() {
         // 清除画布
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-
+        // 绘制底部透明
+        renderRgba(this.ctx);
         // 绘制底图
         if (this.sceneBackground) {
             const [, , w, h] = this.sceneBackground.pos;
@@ -99,7 +121,8 @@ export class Editor implements appendShapeAble {
             renderYRod(this.ctx);
         }
         // 重新绘制所有图元
-        [...this.layersMapper.keys()].sort().forEach(i => this.layersMapper.get(i)!.render(this.ctx));
+        // [...this.layersMapper.keys()].sort().forEach(i => this.layersMapper.get(i)!.render(this.ctx));
+        this.shapes.forEach(f => f(this.ctx));
     }
 
     /**
@@ -114,7 +137,11 @@ export class Editor implements appendShapeAble {
         layer!.append(el);
         return layer!;
     }
-
+    /**
+     * 设置场景宽高
+     * @param width 宽度
+     * @param height 高度
+     */
     public setSceneSize(width: number, height: number) {
         this.sceneWidth = width;
         this.sceneHeight = height;
@@ -122,7 +149,6 @@ export class Editor implements appendShapeAble {
         this.ctx.canvas.height = this.sceneHeight;
     }
 
-    // 设置底图
     /**
      * 设置底图
      * @param bitMap 底图
@@ -153,7 +179,9 @@ export class Editor implements appendShapeAble {
      * 获取快照
      */
     public snapshot(): CanvasPattern {
+        this.hideRod();
         const pat = this.ctx.createPattern(this.ctx.canvas, 'no-repeat');
+        this.showRod();
         if (pat === null) {
             throw new Error('cont create pat!');
         }
@@ -161,35 +189,35 @@ export class Editor implements appendShapeAble {
     }
 
     /**
-     * 画一条线
+     * 画一路径
      */
     public async drawLine(): Promise<Path | null> {
         return new Promise((resolve, reject) => {
-            const pat = this.snapshot();
+            const ctx = this.drawStart();
             let p0: number[] | null = null;
             const mousedownHandler = (e: MouseEvent) => {
                 if (p0 === null) {
                     p0 = [e.offsetX, e.offsetY];
                 } else {
-                    this.ctx.canvas.removeEventListener('mousedown', mousedownHandler);
-                    this.ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
+                    ctx.canvas.removeEventListener('mousedown', mousedownHandler);
+                    ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
+                    this.drawEnd(ctx);
+                    this.appendShape(putPath([[p0[0], p0[1]], [e.offsetX, e.offsetY]]));// 添加图元
                     resolve([[p0[0], p0[1]], [e.offsetX, e.offsetY]]);
                     return;
                 }
             }
             const mousemoveHandler = (e: MouseEvent) => {
                 if (p0 !== null) {
-                    this.ctx.fillStyle = pat;
-                    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(p0[0], p0[1]);
-                    this.ctx.lineTo(e.offsetX, e.offsetY);
-                    this.ctx.closePath();
-                    this.ctx.stroke();
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.beginPath();
+                    ctx.moveTo(p0[0], p0[1]);
+                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.stroke();
                 }
             }
-            this.ctx.canvas.addEventListener('mousedown', mousedownHandler);
-            this.ctx.canvas.addEventListener('mousemove', mousemoveHandler);
+            ctx.canvas.addEventListener('mousedown', mousedownHandler);
+            ctx.canvas.addEventListener('mousemove', mousemoveHandler);
         });
     }
 
@@ -198,7 +226,7 @@ export class Editor implements appendShapeAble {
      */
     public drawPolygon(): Promise<Polygon | null> {
         return new Promise((resolve, reject) => {
-            const pat = this.snapshot();
+            const ctx = this.drawStart();
             let plist: Point[] = [];
             const mousedownHandler = (e: MouseEvent) => {
                 if (e.button === 0) {
@@ -207,17 +235,16 @@ export class Editor implements appendShapeAble {
                 }
             }
             const render = (x?: number, y?: number) => {
-                this.ctx.fillStyle = pat;
-                this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-                this.ctx.beginPath();
-                this.ctx.moveTo(...plist[0]);
+                ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(...plist[0]);
                 for (let i = 1; i < plist.length; i++)
-                    this.ctx.lineTo(...plist[i]);
+                    ctx.lineTo(...plist[i]);
                 if (x !== undefined && y !== undefined) {
-                    this.ctx.lineTo(x, y);
+                    ctx.lineTo(x, y);
                 }
-                this.ctx.closePath();
-                this.ctx.stroke();
+                ctx.closePath();
+                ctx.stroke();
             }
             const mousemoveHandler = (e: MouseEvent) => {
                 if (plist.length !== 0) {
@@ -234,25 +261,27 @@ export class Editor implements appendShapeAble {
 
             const keypressHandler = (e: KeyboardEvent) => {
                 if (e.keyCode === 115) {   // s
-                    this.ctx.canvas.removeEventListener('contextmenu', contextmenuHandler);
-                    this.ctx.canvas.removeEventListener('mousedown', mousedownHandler);
-                    this.ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
+                    ctx.canvas.removeEventListener('contextmenu', contextmenuHandler);
+                    ctx.canvas.removeEventListener('mousedown', mousedownHandler);
+                    ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
                     window.removeEventListener('keypress', keypressHandler);
                     render();
+                    this.drawEnd(ctx);
+                    this.appendShape(putPloygon(plist));
                     resolve(plist);
                 } else if (e.keyCode === 113) {   // q
-                    this.ctx.canvas.removeEventListener('contextmenu', contextmenuHandler);
-                    this.ctx.canvas.removeEventListener('mousedown', mousedownHandler);
-                    this.ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
+                    ctx.canvas.removeEventListener('contextmenu', contextmenuHandler);
+                    ctx.canvas.removeEventListener('mousedown', mousedownHandler);
+                    ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
                     window.removeEventListener('keypress', keypressHandler);
-                    this.ctx.fillStyle = pat;
-                    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    this.drawEnd(ctx);
                     resolve(null);
                 }
             }
-            this.ctx.canvas.addEventListener('contextmenu', contextmenuHandler);
-            this.ctx.canvas.addEventListener('mousedown', mousedownHandler);
-            this.ctx.canvas.addEventListener('mousemove', mousemoveHandler);
+            ctx.canvas.addEventListener('contextmenu', contextmenuHandler);
+            ctx.canvas.addEventListener('mousedown', mousedownHandler);
+            ctx.canvas.addEventListener('mousemove', mousemoveHandler);
             window.addEventListener('keypress', keypressHandler);
         });
     }
@@ -262,16 +291,18 @@ export class Editor implements appendShapeAble {
      */
     public drawCircle(): Promise<Circle | null> {
         return new Promise((resolve, reject) => {
-            const pat = this.snapshot();
+            const ctx = this.drawStart();
             let circle: Circle | null = null;
             const mousedownHandler = (e: MouseEvent) => {
                 if (e.button === 0) {
                     if (circle === null) {
                         circle = [[e.offsetX, e.offsetY], 0];
                     } else {
-                        this.ctx.canvas.removeEventListener('mousedown', mousedownHandler);
-                        this.ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
+                        ctx.canvas.removeEventListener('mousedown', mousedownHandler);
+                        ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
                         circle = [[circle[0][0], circle[0][1]], towPointDis([circle[0][0], circle[0][1]], [e.offsetX, e.offsetY])];
+                        this.drawEnd(ctx);
+                        this.appendShape(putCircle(circle));
                         resolve(circle);
                         return;
                     }
@@ -279,15 +310,79 @@ export class Editor implements appendShapeAble {
             }
             const mousemoveHandler = (e: MouseEvent) => {
                 if (circle !== null) {
-                    this.ctx.fillStyle = pat;
-                    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                     circle = [[circle[0][0], circle[0][1]], towPointDis([circle[0][0], circle[0][1]], [e.offsetX, e.offsetY])];
                     const [[x, y], r] = circle;
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.beginPath();
+                    ctx.arc(x, y, r, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+            }
+            ctx.canvas.addEventListener('mousedown', mousedownHandler);
+            ctx.canvas.addEventListener('mousemove', mousemoveHandler);
+        });
+    }
+
+    /**
+     * 添加图元
+     * @param r 图元函数
+     */
+    private appendShape(r: R): void {
+        this.shapes.push(r);
+        this.render();
+    }
+    /**
+     * 开始一个绘图
+     */
+    private drawStart(): CanvasRenderingContext2D {
+        const ctx = createCanvasContext2d();
+        ctx.canvas.width = this.ctx.canvas.width;
+        ctx.canvas.height = this.ctx.canvas.height;
+        ctx.canvas.style.position = 'absolute';
+        this.wrap!.appendChild(ctx.canvas);
+        return ctx;
+    }
+
+    /**
+     * 结束一个绘图
+     * @param ctx 需要结束的上下文
+     */
+    private drawEnd(ctx: CanvasRenderingContext2D) {
+        ctx.canvas.remove();
+    }
+
+    /**
+     * 移动当前画布
+     */
+    public move(): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            let p0: number[] | null = null;
+            const pat = this.snapshot();
+            const mousedownHandler = (e: MouseEvent) => {
+                if (p0 === null) {
+                    p0 = [e.offsetX, e.offsetY];
+                } else {
+                    this.ctx.canvas.removeEventListener('mousedown', mousedownHandler);
+                    this.ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
+                    this.render();
+                    resolve(true);
+                    return;
+                }
+            }
+            const mousemoveHandler = (e: MouseEvent) => {
+                if (p0 !== null) {
+                    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                    renderRgba(this.ctx);
+
+                    this.ctx.save();
+                    this.ctx.translate(e.offsetX - p0[0], e.offsetY - p0[1]);
                     this.ctx.fillStyle = pat;
                     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-                    this.ctx.beginPath();
-                    this.ctx.arc(x, y, r, 0, 2 * Math.PI);
-                    this.ctx.stroke();
+                    this.ctx.restore();
+                    
+                    renderXRod(this.ctx);
+                    renderYRod(this.ctx);
                 }
             }
             this.ctx.canvas.addEventListener('mousedown', mousedownHandler);
@@ -295,5 +390,37 @@ export class Editor implements appendShapeAble {
         });
     }
 
+    /**
+     * 缩放当前画布
+     */
+    public zoom(): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            let p0: number[] | null = null;
+            const pat = this.snapshot();
+            const mousedownHandler = (e: MouseEvent) => {
+                if (p0 === null) {
+                    p0 = [e.offsetX, e.offsetY];
+                } else {
+                    this.ctx.canvas.removeEventListener('mousedown', mousedownHandler);
+                    this.ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
+                    return;
+                }
+            }
+            const mousemoveHandler = (e: MouseEvent) => {
+                if (p0 !== null) {
+                    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                    this.ctx.save();
+                    this.ctx.scale(
+                        (this.ctx.canvas.width - (e.offsetX - p0[0])) / this.ctx.canvas.width
+                        , (this.ctx.canvas.height - (e.offsetY - p0[1])) / this.ctx.canvas.height);
+                    this.ctx.fillStyle = pat;
+                    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+                    this.ctx.restore();
+                }
+            }
+            this.ctx.canvas.addEventListener('mousedown', mousedownHandler);
+            this.ctx.canvas.addEventListener('mousemove', mousemoveHandler);
+        });
+    }
 
 }

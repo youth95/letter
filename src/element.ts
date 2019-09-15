@@ -1,5 +1,40 @@
-import { Point, isInPolygon, Path, RectPos, getPointsRect, Circle } from "./planimetry";
+import { Point, isInPolygon, Polygon, Path, RectPos, getPointsRect, Circle } from "./planimetry";
 import { createCanvasContext2d } from "./utils";
+
+export type R = (ctx: CanvasRenderingContext2D) => void;
+
+export function putPath(path: Path): R {
+    return (ctx: CanvasRenderingContext2D) => {
+        ctx.beginPath()
+        ctx.moveTo(...path[0]);
+        for (let i = 1; i < path.length; i++) {
+            ctx.lineTo(...path[i]);
+        }
+        ctx.stroke();
+    }
+}
+
+export function putPloygon(ploygon: Polygon): R {
+    return (ctx: CanvasRenderingContext2D) => {
+        ctx.beginPath()
+        ctx.moveTo(...ploygon[0]);
+        for (let i = 1; i < ploygon.length; i++) {
+            ctx.lineTo(...ploygon[i]);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    }
+}
+
+export function putCircle(circle: Circle): R {
+    return (ctx: CanvasRenderingContext2D) => {
+        const [[x, y], r] = circle;
+        ctx.arc(x, y, r, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+}
+
+
 
 
 export abstract class Element<T = any>  {
@@ -197,6 +232,7 @@ class EPath extends Element<PloygonInitOptions>{
 
 
 }
+
 
 export function createPath(options: PloygonInitOptions): EPath {
     const path = new EPath();
