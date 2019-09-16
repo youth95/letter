@@ -167,3 +167,33 @@ export function getPointsRect(points: Path): RectPos {
     return [0, 0, Math.abs(minx - maxx), Math.abs(miny - maxy)];
 
 }
+
+/**
+ * 判断点是否在矩形区域内
+ * @param rect 矩形区域
+ * @param p 点
+ */
+export function isInRect(rect: RectPos, p: Point): boolean {
+    const [x, y, w, h] = rect;
+    const [x0, y0] = p;
+    return x0 >= x && x0 <= x + w && y0 >= y && y0 <= y + h;
+}
+
+/**
+ * 返回点所在的第一个矩形区域
+ * @param rects 多个矩形区域
+ * @param p 点
+ */
+export function isInRects(rects: RectPos[], p: Point): number {
+    return rects.findIndex(item => isInRect(item, p));
+}
+
+/**
+ * 复制一个路径
+ * @param src 源
+ */
+export function copyPath(src: Path): Path {
+    const path: Path = [];
+    src.forEach((item: Point) => path.push([item[0], item[1]]));
+    return path;
+}
