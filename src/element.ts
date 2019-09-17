@@ -16,6 +16,7 @@ export function putPath(path: Path,closed:boolean = false): R {
         ctx.stroke();
     }
 }
+
 export function putCircle(circle: Circle): R {
     return (ctx: CanvasRenderingContext2D) => {
         const [[x, y], r] = circle;

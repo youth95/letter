@@ -1,7 +1,7 @@
 import { createCanvasContext2d } from "./utils";
 import { R, putPath, putCircle } from "./element";
 import { renderXRod, renderYRod, renderRgba, renderControlPoint } from "./widget";
-import { Path, Polygon, Point, Circle, towPointDis, isInRect, isInRects, RectPos } from "./planimetry";
+import { Path, Polygon, Point, Circle, towPointDis, isInRect, isInRects, RectPos, copyPath } from "./planimetry";
 
 export function bindWindowKeyBoardSaveAndQuit(save: () => void, quit: () => void) {
     const keypressHandler = (e: KeyboardEvent) => {
@@ -540,6 +540,11 @@ export function mount(root: string): Instance {
     };
 }
 
+export function setSize(instance: Instance, width: number, height: number) {
+    instance.baseCtx.canvas.width = width;
+    instance.baseCtx.canvas.height = height;
+}
+
 /**
  * 开始一个绘图
  */
@@ -601,7 +606,8 @@ export function drawLine(instance: Instance): Promise<Path | null> {
  * @param instance 编辑器实例
  * @param path 需要修改的路径
  */
-export function modifyLine(instance: Instance, path: Path): Promise<Path | null> {
+export function modifyLine(instance: Instance, srcPath: Path): Promise<Path | null> {
+    const path = copyPath(srcPath);
     return new Promise((resolve, reject) => {
         const { baseCtx } = instance;
         const ctx = drawStart(instance);
@@ -654,7 +660,7 @@ export function modifyLine(instance: Instance, path: Path): Promise<Path | null>
             ctx.canvas.removeEventListener('mousedown', mousedownHandler);
             ctx.canvas.removeEventListener('mousemove', mousemoveHandler);
             const pPath = putPath(path);
-            pPath(baseCtx);
+            // pPath(baseCtx);
             drawEnd(ctx);
             resolve(path);
         }, () => {
@@ -667,3 +673,16 @@ export function modifyLine(instance: Instance, path: Path): Promise<Path | null>
     });
 }
 
+/**
+ * 渲染图元集合
+ * @param instance 编辑器实例
+ * @param shapes 图元集合
+ */
+export function renderShapes(instance: Instance, ...shapes: R[]) {
+
+    shapes.forEach(r => r(instance.baseCtx));
+}
+
+export function clear(instance: Instance) {
+    instance.baseCtx.clearRect(0, 0, instance.baseCtx.canvas.width, instance.baseCtx.canvas.height);
+}

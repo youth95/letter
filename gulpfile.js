@@ -25,7 +25,7 @@ gulp.task("typedoc", function() {
 const browserifyOptions = {
   basedir: ".",
   debug: true,
-  standalone:'letter',
+  standalone:'L',
   entries: ["src/index.ts"],
   cache: {},
   packageCache: {}
