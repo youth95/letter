@@ -1,8 +1,8 @@
 {
-  "name": "cut-main",
+  "name": "letter",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "jest . --coverage --watchAll",
     "build": "gulp",

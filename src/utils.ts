@@ -213,7 +213,7 @@ export const eqT = isEq(true);
 /**
  * 创建一个canvas绘图对象
  */
-export const createCanvasContext2d = () => {
+export const createCanvasContext2d = ():CanvasRenderingContext2D => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (ctx === null) {

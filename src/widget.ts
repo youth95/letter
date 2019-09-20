@@ -106,3 +106,10 @@ export function renderControlPoint(path: Path) {
         });
     }
 }
+
+export function renderControlBoard(path:Path){
+    return (ctx:CanvasRenderingContext2D):RectPos[] => {
+        
+        return renderControlBoard(path)(ctx);
+    }
+}

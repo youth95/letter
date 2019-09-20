@@ -1,4 +1,4 @@
-import { range, map, pos2index, rowIndex, colorChannel, mergeColorChannel, colIndex, countArray, addArray, addArrays, copyArrayElements, chunk } from "./utils";
+import { range, map, pos2index, rowIndex, colorChannel, mergeColorChannel, colIndex, countArray, addArray, addArrays, copyArrayElements, chunk, createCanvasContext2d } from "./utils";
 
 describe('utils', () => {
   it('should range', () => {
@@ -64,5 +64,9 @@ describe('utils', () => {
     expect(chunk(1,[1,1,1])).toEqual([[1],[1],[1]]);
     expect(chunk(2,[1,1,1])).toEqual([[1,1],[1]]);
   });
+
+  it('createCanvasContext2d',() => {
+    expect(createCanvasContext2d()).toBeDefined();
+  })
 
 });

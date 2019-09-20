@@ -197,3 +197,94 @@ export function copyPath(src: Path): Path {
     src.forEach((item: Point) => path.push([item[0], item[1]]));
     return path;
 }
+
+/**
+ * 变换矩阵
+ */
+export type TransformMatrix = [
+    number, number, number,
+    number, number, number,
+    number, number, number,
+]
+
+/**
+ * 创建变换矩阵
+ */
+export function createTransformMatrix(): TransformMatrix {
+    return [
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1,
+    ];
+}
+
+/**
+ * 变换一个点
+ * @param m 变换矩阵
+ * @param p 需要变换的点
+ */
+export function transform(m: TransformMatrix, p: Point): Point {
+    const [x, y] = p;
+    return [
+        m[0] * x + m[1] * y + m[2],
+        m[3] * x + m[4] * y + m[5],
+    ]
+}
+
+/**
+ * 变换一个路径
+ * @param m 变换矩阵
+ * @param path 需要变换的路径
+ */
+export function transformPath(m: TransformMatrix, path: Path): Path {
+    return path.map(p => transform(m, p));
+}
+
+/**
+ * 返回平移后新的变换矩阵
+ * @param m 变换矩阵
+ * @param x x增量
+ * @param y y增量
+ * @param z z增量
+ */
+export function translate(m: TransformMatrix, x: number = 0, y: number = 0, z: number = 0): TransformMatrix {
+    const nm: TransformMatrix = createTransformMatrix();
+    nm[2] += x;
+    nm[5] += y;
+    nm[8] += z;
+    return multiplyTransformMatrix(m, nm);
+}
+
+/**
+ * 返回伸缩后新的变换矩阵
+ * @param m 变换矩阵
+ * @param x x增量
+ * @param y y增量
+ * @param z z增量
+ */
+export function scale(m: TransformMatrix, x: number = 0, y: number = 0, z: number = 0) {
+    const nm: TransformMatrix = createTransformMatrix();
+    nm[0] += x;
+    nm[4] += y;
+    nm[8] += z;
+    return multiplyTransformMatrix(m, nm);
+}
+
+/**
+ * 变换矩阵相乘
+ * @param a 矩阵a
+ * @param b 矩阵b
+ */
+export function multiplyTransformMatrix(a: TransformMatrix, b: TransformMatrix): TransformMatrix {
+    const [a11, a12, a13,
+        a21, a22, a23,
+        a31, a32, a33,] = a;
+    const [b11, b12, b13,
+        b21, b22, b23,
+        b31, b32, b33,] = b;
+    return [
+        a11 * b11 + a12 * b21 + a13 * b31, a11 * b12 + a12 * b22 + a13 * b32, a11 * b13 + a12 * b23 + a13 * b33,
+        a21 * b11 + a22 * b21 + a23 * b31, a21 * b12 + a22 * b22 + a23 * b32, a21 * b13 + a22 * b23 + a23 * b33,
+        a31 * b11 + a32 * b21 + a33 * b31, a31 * b12 + a32 * b22 + a33 * b32, a31 * b13 + a32 * b23 + a33 * b33,
+    ];
+}
