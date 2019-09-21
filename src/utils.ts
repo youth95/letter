@@ -1,3 +1,5 @@
+import { Point } from "./planimetry";
+
 export type PureParams = number | string | boolean;
 export type PureFunction = (x: PureParams) => any;
 export type PureNumberFunction = (x: number) => any;
@@ -143,7 +145,14 @@ export function mergeColorChannel(channels: colorChannels, width: number): Image
  * @param y 纵坐标
  * @param w 画布宽度
  */
-export function pos2index(x: number, y: number, w: number) { return x + y * w; }
+export function pos2index(x: number, y: number, w: number): number { return x + y * w; }
+
+/**
+ * 通过实际的通道中的下标计算出像素在画布上的横纵坐标
+ * @param i 下标
+ * @param w 画布宽度
+ */
+export function index2pos(i: number, w: number): Point { return [i % w, Math.floor(i / w)]; }
 
 /**
  * 输出一个图像逐行访问的所有下标
@@ -213,11 +222,11 @@ export const eqT = isEq(true);
 /**
  * 创建一个canvas绘图对象
  */
-export const createCanvasContext2d = ():CanvasRenderingContext2D => {
+export const createCanvasContext2d = (): CanvasRenderingContext2D => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (ctx === null) {
-      throw new Error('cont create canvas ctx !');
+    throw new Error('cont create canvas ctx !');
   }
   return ctx;
 }

@@ -499,11 +499,13 @@ export class Editor {
         const l = await drawLine(this.instance);
         if (l) {
             const nl = await modifyLine(this.instance, l);
+            const [x, y] = this.rectPos;
             if (nl) {
+                const t: Path = nl.map((p:Point) => [p[0] - x, p[1] - y])
                 this.shapes.push({
-                    r: putPath(nl),
+                    r: putPath(t),
                     type: EShape.Line,
-                    data: nl,
+                    data: t,
                     zindex: this.autoZIndex++
                 });
                 this.render();
