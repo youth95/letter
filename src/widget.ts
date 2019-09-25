@@ -75,6 +75,18 @@ const agb = () => {
     return pattern;
 }
 
+export const rect8 = (() => {
+    gctx.canvas.height = 8;
+    gctx.canvas.width = 8;
+    gctx.fillStyle = '#000';
+    gctx.fillRect(0, 0, 8, 8);
+    const pattern = gctx.createPattern(gctx.canvas, 'repeat');
+    if (pattern === null) {
+        throw new Error('cont create canvas pattern !');
+    }
+    return pattern;
+})();
+
 
 export function renderXRod(ctx: CanvasRenderingContext2D, gap: number = 4) {
     ctx.fillStyle = '#ffffff';
@@ -107,9 +119,8 @@ export function renderControlPoint(path: Path) {
     }
 }
 
-export function renderControlBoard(path:Path){
-    return (ctx:CanvasRenderingContext2D):RectPos[] => {
-        
+export function renderControlBoard(path: Path) {
+    return (ctx: CanvasRenderingContext2D): RectPos[] => {
         return renderControlBoard(path)(ctx);
     }
 }

@@ -1,7 +1,7 @@
 import { createCanvasContext2d } from "./utils";
-import { R, putPath, putCircle, putImage } from "./element";
-import { renderControlPoint, renderXRod, renderYRod, renderRgba } from "./widget";
-import { Path, Point, Circle, towPointDis, isInRects, RectPos, copyPath, TransformMatrix, createTransformMatrix } from "./planimetry";
+import { R, putPath, putCircle, putPattern, Pattern, putImageSource } from "./R";
+import { renderControlPoint, renderXRod, renderYRod, renderRgba, rect8 } from "./widget";
+import { Path, Point, Circle, towPointDis, isInRects, RectPos, copyPath, } from "./planimetry";
 
 /**
  * 绑定保存和退出函数
@@ -21,6 +21,9 @@ export function bindWindowKeyBoardSaveAndQuit(save: () => void, quit: () => void
     window.addEventListener('keypress', keypressHandler);
 }
 
+/**
+ * 编辑器实例
+ */
 export interface Instance {
     wrap: HTMLDivElement;
     baseCtx: CanvasRenderingContext2D;
@@ -380,19 +383,68 @@ export function drawCircle(instance: Instance): Promise<Circle | null> {
     });
 }
 
-export enum EShape {
-    Line,
-    Path,
-    Ploygon,
-    Circle,
-    Image,
+export function drawPoint(instance: Instance): Promise<Point> {
+    return new Promise((resolve) => {
+        const ctx = drawStart(instance);
+        let point: Point | null = null;
+        ctx.canvas.addEventListener('click', (e: MouseEvent) => {
+            point = [e.offsetX, e.offsetY];
+            drawEnd(ctx);
+            resolve(point);
+        });
+    })
 }
+
+/**
+ * 图元类型
+ */
+export enum EShape {
+    /**
+     * 线段
+     */
+    Line,
+
+    /**
+     * 路径
+     */
+    Path,
+
+    /**
+     * 多边形
+     */
+    Ploygon,
+
+    /**
+     * 圆
+     */
+    Circle,
+
+    /**
+     * 图像
+     */
+    Image,
+
+    /**
+     * 图像源
+     */
+    ImageSource,
+
+    /**
+     * 模式
+     */
+    Pattern,
+}
+
 
 export interface Shape {
     type: EShape,
     r: R,
-    data: Path | Circle | HTMLImageElement,
+    data: Path | Circle | HTMLImageElement | any,
     zindex: number,
+}
+
+export interface EditorEvent {
+    onDrawFinish?(shape: Shape): void
 }
 
 export interface EditorOptions {
@@ -410,14 +462,15 @@ export interface EditorOptions {
      * 是否显示透明背景
      */
     isShowRgba?: boolean;
+
+    /**
+     * 编辑器事件
+     */
+    events?: EditorEvent
 }
 
 export class EditorNavigator {
     constructor(private editor: Editor, private realRectPos: RectPos, private sx: number, private sy: number) { }
-
-    private bind() {
-
-    }
 
     public render() {
         const ctx = createCanvasContext2d();
@@ -461,6 +514,7 @@ export class Editor {
     public shapes: Shape[] = [];
     private autoZIndex: number = 0;
     private rectPos: RectPos = [0, 0, 100, 100];
+    private events: EditorEvent;
 
     private cache: CanvasRenderingContext2D = createCanvasContext2d();
 
@@ -473,6 +527,9 @@ export class Editor {
         if (options.isShowRgba) {
             this.beforeR.push(renderRgba);
         }
+        this.events = options.events || {
+            onDrawFinish: (shape: Shape) => { },
+        };
     }
 
     public setSize(width: number, height: number) {
@@ -501,14 +558,19 @@ export class Editor {
             const nl = await modifyLine(this.instance, l);
             const [x, y] = this.rectPos;
             if (nl) {
-                const t: Path = nl.map((p:Point) => [p[0] - x, p[1] - y])
-                this.shapes.push({
+                const t: Path = nl.map((p: Point) => [p[0] - x, p[1] - y]);
+                const shape: Shape = {
                     r: putPath(t),
                     type: EShape.Line,
                     data: t,
                     zindex: this.autoZIndex++
-                });
+                };
+                this.shapes.push(shape);
                 this.render();
+                if (this.events.onDrawFinish) {
+                    this.events.onDrawFinish(shape);
+                }
+                return t;
             }
         }
     }
@@ -518,13 +580,20 @@ export class Editor {
         if (ply) {
             const nply = await modifyPolygon(this.instance, ply);
             if (nply) {
-                this.shapes.push({
-                    r: putPath(nply, true),
+                const [x, y] = this.rectPos;
+                const t: Path = nply.map((p: Point) => [p[0] - x, p[1] - y]);
+                const shape: Shape = {
+                    r: putPath(t, true),
                     type: EShape.Ploygon,
-                    data: nply,
+                    data: t,
                     zindex: this.autoZIndex++,
-                });
+                };
+                this.shapes.push(shape);
                 this.render();
+                if (this.events.onDrawFinish) {
+                    this.events.onDrawFinish(shape);
+                }
+                return t;
             }
         }
     }
@@ -532,21 +601,58 @@ export class Editor {
     public async drawACircle() {
         const c = await drawCircle(this.instance);
         if (c) {
-            this.shapes.push({
-                r: putCircle(c),
+            const [x, y] = this.rectPos;
+            const shape: Shape = {
+                r: putCircle([[c[0][0] - x, c[0][1] - y], c[1]]),
                 type: EShape.Circle,
-                data: c,
+                data: [[c[0][0] - x, c[0][1] - y], c[1]],
                 zindex: this.autoZIndex++,
-            })
+            };
+            this.shapes.push(shape);
             this.render();
+            if (this.events.onDrawFinish) {
+                this.events.onDrawFinish(shape);
+            }
+            return [[c[0][0] - x, c[0][1] - y], c[1]];
+        }
+    }
+
+    public async drawAPoint() {
+        const [x, y] = this.rectPos;
+        const point = await drawPoint(this.instance);
+        const pat: Pattern = {
+            width: 8,
+            height: 8,
+            pattern: rect8
+        };
+        const shape: Shape = {
+            r: putPattern([point[0] - x, point[1] - y], pat),
+            type: EShape.Pattern,
+            data: [[point[0] - x, point[1] - y], pat],
+            zindex: this.autoZIndex++,
+        };
+        this.shapes.push(shape);
+        this.render();
+        if (this.events.onDrawFinish) {
+            this.events.onDrawFinish(shape);
         }
     }
 
     public putImage(image: HTMLImageElement) {
         this.shapes.push({
-            r: putImage(image),
+            r: putImageSource(image),
             data: image,
             type: EShape.Image,
+            zindex: this.autoZIndex++,
+        });
+        this.render();
+    }
+
+    public putImageSource(image: CanvasImageSource) {
+        this.shapes.push({
+            r: putImageSource(image),
+            data: image,
+            type: EShape.ImageSource,
             zindex: this.autoZIndex++,
         });
         this.render();
@@ -582,6 +688,7 @@ export class Editor {
 
     private keypressHandler = (e: KeyboardEvent) => {
         switch (e.key) {
+            case '`': this.drawAPoint(); break;
             case '1': this.drawALine(); break;
             case '2': this.drawAPolygon(); break;
             case '3': this.drawACircle(); break;
@@ -591,6 +698,12 @@ export class Editor {
     private renderAllSahpes() {
         this.shapes.forEach(item => item.r(this.instance.baseCtx));
         this.shapes.forEach(item => item.r(this.cache));
+    }
+
+    public popShape() {
+        const tmp = this.shapes.pop();
+        this.render();
+        return tmp;
     }
 
     /**
@@ -623,4 +736,16 @@ export class Editor {
  */
 export function createEditor(options: EditorOptions) {
     return new Editor(options);
+}
+
+/**
+ * 从一个ImageSource开始绘制
+ * @param image 渲染一个底图
+ * @param renders 渲染器
+ */
+export function renderFromImageSource(image: CanvasImageSource, width: number, height: number, renders: R[]): HTMLCanvasElement {
+    const ctx = createCanvasContext2d(width, height);
+    ctx.drawImage(image, width, height);
+    renders.forEach(r => r(ctx));
+    return ctx.canvas;
 }

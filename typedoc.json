@@ -1,0 +1,9 @@
+{
+    "module": "commonjs",
+    "target": "es5",
+    "exclude": [
+        "**/*.test.ts"
+    ],
+    "out": "docs/",
+    "name": "Letter"
+}

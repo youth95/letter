@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest . --coverage --watchAll",
     "build": "gulp",
-    "doc":"gulp typedoc"
+    "doc": "typedoc"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
     "@types/gulp": "^4.0.6",
     "@types/jest": "^24.0.18",
     "browserify": "^16.5.0",
+    "canvas": "^2.6.0",
     "gulp": "^4.0.2",
     "gulp-cli": "^2.2.0",
     "gulp-sourcemaps": "^2.6.5",
@@ -26,6 +27,7 @@
     "ts-jest": "^24.0.2",
     "tsify": "^4.0.1",
     "typedoc": "^0.15.0",
+    "typedoc-plugin-external-module-name": "^2.1.0",
     "typescript": "^3.5.3",
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0"

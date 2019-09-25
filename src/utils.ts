@@ -124,6 +124,37 @@ export function chunk(size: number, arr: any[]) {
   }
   return result;
 }
+
+/**
+ * 生成数组滑窗
+ * @param size 滑窗大小
+ * @param arr 数组
+ * @example
+ * sliding(2,[1]);  // [[1]]
+ * sliding(2,[1,2]);  // [[1,2]]
+ * sliding(2,[1,2,3]);  // [[1,2],[2,3]]
+ * sliding(1,[1,2,3]);  // [[1],[2],[3]]
+ * sliding(0,[1]);  // [[1]]
+ * sliding(0,[1,2,3]);  // [[1,2,3]]
+ * sliding(-1,[1,2,3]);  // [[1,2,3]]
+ * 
+ */
+export function sliding(size: number, arr: any[]):any[][] {
+  if (size <= 0) {
+    return [arr];
+  }
+
+  const result: any[] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    if (i + size < arr.length) {
+      result.push(arr.slice(i, i + size));
+    } else {
+      result.push(arr.slice(i, arr.length - 1));
+      break;
+    }
+  }
+  return result;
+}
 /**
  * 合并4个图像通道为一个图像数据
  * @param channels 通道数据集
@@ -222,8 +253,10 @@ export const eqT = isEq(true);
 /**
  * 创建一个canvas绘图对象
  */
-export const createCanvasContext2d = (): CanvasRenderingContext2D => {
+export const createCanvasContext2d = (width: number = 100, height: number = 100): CanvasRenderingContext2D => {
   const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext('2d');
   if (ctx === null) {
     throw new Error('cont create canvas ctx !');
