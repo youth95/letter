@@ -3,6 +3,9 @@ import { EventNames, ViewPortMouseEvent } from './handler/MouseEventHandler';
 import { Engine } from './Engine';
 import { createCanvasContext2d } from './utils';
 
+/**
+ * 视窗选项
+ */
 export interface ViewPortOptions {
   ctx: CanvasRenderingContext2D;
   width: number;
@@ -10,6 +13,9 @@ export interface ViewPortOptions {
   transformMatrix: TransformMatrix;
 }
 
+/**
+ * 视窗类
+ */
 export class ViewPort {
   private readonly ctx: CanvasRenderingContext2D;
   private width: number;

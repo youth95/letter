@@ -1,10 +1,5 @@
-/**
- * @module AAA
- */
-
 import { Shape } from "./shapes/Shape";
-import { Point } from "./planimetry";
-import { EventNames, ViewPortMouseEvent } from "./handler/MouseEventHandler";
+import { ViewPortMouseEvent } from "./handler/MouseEventHandler";
 
 /**
  * 渲染引擎
