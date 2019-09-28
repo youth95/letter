@@ -3,6 +3,8 @@
  */
 
 import { Shape } from "./shapes/Shape";
+import { Point } from "./planimetry";
+import { EventNames, ViewPortMouseEvent } from "./handler/MouseEventHandler";
 
 /**
  * 渲染引擎
@@ -54,5 +56,60 @@ export class Engine {
      */
     public clearAll() {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    }
+
+    /**
+     * 触发视窗鼠标事件
+     * @param vev 视窗鼠标事件
+     */
+    public trigger(vev: ViewPortMouseEvent): void {
+        const { p: point, action } = vev;
+        for (const shape of this.shapePool) {
+            if (shape.inRegion(point)) {
+                if (action === 'down') {
+                    if (shape.onMouseDown(vev))
+                        continue;
+                    else
+                        return;
+                } else if (action === 'enter') {
+                    if (shape.onMouseEnter(vev))
+                        continue;
+                    else
+                        return;
+                } else if (action === 'leave') {
+                    if (shape.onMouseLeave(vev))
+                        continue;
+                    else
+                        return;
+                } else if (action === 'move') {
+                    if (shape.onMouseMove(vev))
+                        continue;
+                    else
+                        return;
+                } else if (action === 'out') {
+                    if (shape.onMouseOut(vev))
+                        continue;
+                    else
+                        return;
+                } else if (action === 'over') {
+                    if (shape.onMouseOver(vev))
+                        continue;
+                    else
+                        return;
+                } else if (action === 'up') {
+                    if (shape.onMouseUp(vev))
+                        continue;
+                    else
+                        return;
+                } else if (action === 'wheel') {
+                    if (shape.onMouseWheel(vev))
+                        continue;
+                    else
+                        return;
+                } else {
+                    throw new Error(`cont handler the mouse event ${vev.action}`);
+                }
+            }
+        }
     }
 }

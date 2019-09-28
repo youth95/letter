@@ -263,3 +263,21 @@ export const createCanvasContext2d = (width: number = 100, height: number = 100)
   }
   return ctx;
 }
+
+/**
+ * 合并多个数组
+ * @param arrs 需要合并的数据集
+ * @example
+ * zip([[1,2,3],[4,5,6],[7,8,9]]);  // [[1,4,7],[2,5,8],[3,6,9]]
+ */
+export function zip(arrs:any[][]):any[]{
+  const result = [];
+  for(let i = 0;i<arrs[0].length;i++){
+    const chunk = [];
+    for(let j = 0;j<arrs.length;j++){
+      chunk.push(arrs[j][i]);
+    }
+    result.push(chunk);
+  }
+  return result;
+}

@@ -1,29 +1,29 @@
-import { MouseEvent } from "../handler/MouseEventHandler";
+import { ViewPortMouseEvent } from "../handler/MouseEventHandler";
 export class DefaultMouseEvent {
-    public onMouseDown(e: MouseEvent): boolean {
+    public onMouseDown(e: ViewPortMouseEvent): boolean {
         return true;
     }
 
-    public onMouseEnter(e: MouseEvent): boolean {
+    public onMouseEnter(e: ViewPortMouseEvent): boolean {
         return true;
     };
 
-    public onMouseLeave(e: MouseEvent): boolean {
+    public onMouseLeave(e: ViewPortMouseEvent): boolean {
         return true;
     };
-    public onMouseMove(e: MouseEvent): boolean {
+    public onMouseMove(e: ViewPortMouseEvent): boolean {
         return true;
     };
-    public onMouseOut(e: MouseEvent): boolean {
+    public onMouseOut(e: ViewPortMouseEvent): boolean {
         return true;
     }
-    public onMouseOver(e: MouseEvent): boolean {
+    public onMouseOver(e: ViewPortMouseEvent): boolean {
         return true;
     }
-    public onMouseUp?(e: MouseEvent): boolean {
+    public onMouseUp(e: ViewPortMouseEvent): boolean {
         return true;
     }
-    public onMouseWheel(e: MouseEvent): boolean {
+    public onMouseWheel(e: ViewPortMouseEvent): boolean {
         return true;
     }
 }
