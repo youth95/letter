@@ -25,5 +25,14 @@ export interface ViewPortMouseEvent {
  * 鼠标事件管理器
  */
 export class MouseEventHandler {
+    constructor(private viewport: ViewPort) { }
+
+    public bindMove() {
+        this.viewport.engine.ctx.canvas.addEventListener('mousemove', e => {
+            const ctx = this.viewport.engine.ctx;
+            const { offsetTop, offsetLeft } = ctx.canvas;
+            this.viewport.trigger([e.offsetX - offsetLeft, e.offsetY - offsetTop], 'move');
+        });
+    }
 
 }

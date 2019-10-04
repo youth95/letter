@@ -64,6 +64,13 @@ export function putCircle(circle: Circle): R {
     }
 }
 
+export function putRect(rectPos:RectPos):R{
+    return (ctx:CanvasRenderingContext2D) => {
+        ctx.beginPath();
+        ctx.fillRect(...rectPos);
+    }
+}
+
 /**
  * 全画布渲染图像源
  * @param imageSource 图像源

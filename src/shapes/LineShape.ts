@@ -1,11 +1,3 @@
-/**
- * @module Shapes
- */
-
-/**
- * 图形
- */
-
 import { R, putPath } from "../R";
 import { Point, towPointDis } from "../planimetry";
 import { Shape } from "./Shape";
@@ -41,7 +33,8 @@ export class LineShape extends Shape {
     public static inRegion(start: Point, end: Point, p: Point): boolean {
         const l0 = towPointDis(p, start);
         const l1 = towPointDis(p, end);
-        return towPointDis(start, end) == l0 + l1;
+        const dis = towPointDis(start, end);
+        return Math.round(l0 + l1 ) === Math.round(dis);
     }
 
     public inRegion(p: [number, number]): boolean {

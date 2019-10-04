@@ -9,6 +9,15 @@
 import { R } from "../R";
 import { Point } from "../planimetry";
 import { DefaultMouseEvent } from "../handler/DefaultMouseEvent";
+import { Engine } from "../Engine";
+
+export interface HitAble {
+    /**
+     * 判断目标点是否在该图形区域内
+     * @param p 目标点
+     */
+    inRegion(p: Point): boolean;
+}
 
 export interface DrawState {
     direction?: CanvasDirection;
@@ -34,7 +43,18 @@ export interface DrawState {
 
 }
 
-export abstract class Shape extends DefaultMouseEvent {
+export abstract class Shape extends DefaultMouseEvent implements HitAble {
+
+    /**
+     * 表示当前是否进入了该shape
+     */
+    public isEnter:boolean = false;
+
+    /**
+     * 表示当前是否离开了该shape
+     */
+    public isLeave:boolean = false;
+
     /**
      * 自增id
      */
@@ -50,7 +70,19 @@ export abstract class Shape extends DefaultMouseEvent {
      */
     public visable: boolean = true;
 
+    private engine:Engine|null = null;
+
     public drawState: DrawState | null = null;
+
+    public setEngine(engine:Engine){
+        this.engine = engine;
+    }
+
+    public remove(){
+        if(this.engine){
+            this.engine.remove(this);
+        }
+    }
 
     /**
      * 构造函数
@@ -95,11 +127,24 @@ export abstract class Shape extends DefaultMouseEvent {
      */
     public abstract render: R;
 
-    /**
-     * 判断目标点是否在该图形区域内
-     * @param p 目标点
-     */
     public abstract inRegion(p: Point): boolean;
+
+    public inRegionAndSetEnterState(p:Point):boolean{
+        const isIn = this.inRegion(p);
+        if(isIn){
+            if(!this.isEnter){
+                this.isEnter = true;
+                this.isLeave = false;
+            }
+        }else{
+            if(this.isEnter){
+                this.isEnter = false;
+                this.isLeave = true;
+            }
+        }
+        
+        return isIn;
+    };
 
     /**
      * 向上移动

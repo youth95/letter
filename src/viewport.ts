@@ -1,7 +1,8 @@
 import { TransformMatrix, Point, transform } from './planimetry';
-import { EventNames, ViewPortMouseEvent } from './handler/MouseEventHandler';
+import { EventNames, ViewPortMouseEvent, MouseEventHandler } from './handler/MouseEventHandler';
 import { Engine } from './Engine';
 import { createCanvasContext2d } from './utils';
+import { Shape } from './shapes';
 
 /**
  * 视窗选项
@@ -57,7 +58,18 @@ export class ViewPort {
       height: this.height,
       transformMatrix: this.transformMatrix,
       ctx: createCanvasContext2d()
-    })
+    });
+  }
+
+  public cloneAndCopyAShape(shape: Shape): ViewPort {
+    const nv = this.clone();
+    nv.engine.add(shape);
+    return nv;
+  }
+
+  public cloneAndCopyAShapeByIndex(index: number): ViewPort {
+    const shape = this.engine.getShape(index);
+    return this.cloneAndCopyAShape(shape);
   }
 
   /**

@@ -13,12 +13,25 @@ export class Engine {
      */
     private shapePool: Shape[] = [];
 
+    public getShape(index: number) {
+        return this.shapePool[index];
+    }
+
+    public get shapePoolSize() {
+        return this.shapePool.length;
+    }
+
     /**
      * 添加图形
      * @param shape 图形
      */
     public add(shape: Shape) {
         this.shapePool.push(shape);
+        shape.setEngine(this);
+    }
+
+    public addSome(shapes:Shape[]){
+        shapes.forEach(shape => this.add(shape));
     }
 
     /**
@@ -30,6 +43,10 @@ export class Engine {
         if (f !== -1) {
             this.shapePool.splice(f, 1);
         }
+    }
+
+    public removeSome(shapes:Shape[]){
+        shapes.forEach(shape => this.remove(shape));
     }
 
     /**
@@ -60,7 +77,7 @@ export class Engine {
     public trigger(vev: ViewPortMouseEvent): void {
         const { p: point, action } = vev;
         for (const shape of this.shapePool) {
-            if (shape.inRegion(point)) {
+            if (shape.inRegionAndSetEnterState(point)) {
                 if (action === 'down') {
                     if (shape.onMouseDown(vev))
                         continue;
@@ -77,7 +94,13 @@ export class Engine {
                     else
                         return;
                 } else if (action === 'move') {
-                    if (shape.onMouseMove(vev))
+                    if (shape.isEnter) {
+                        vev.action = 'enter';
+                        shape.onMouseEnter(vev);
+                    }else if(shape.isLeave){
+                        vev.action = 'leave';
+                        shape.onMouseEnter(vev);
+                    }else if (shape.onMouseMove(vev))
                         continue;
                     else
                         return;
