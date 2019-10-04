@@ -130,4 +130,9 @@ export class Engine {
             }
         }
     }
+
+
+    public addHitRegion():void {
+        
+    }
 }
