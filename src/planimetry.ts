@@ -164,7 +164,7 @@ export function getPointsRect(points: Path): RectPos {
             miny = y;
         }
     }
-    return [0, 0, Math.abs(minx - maxx), Math.abs(miny - maxy)];
+    return [minx, miny, Math.abs(minx - maxx), Math.abs(miny - maxy)];
 
 }
 
@@ -287,4 +287,50 @@ export function multiplyTransformMatrix(a: TransformMatrix, b: TransformMatrix):
         a21 * b11 + a22 * b21 + a23 * b31, a21 * b12 + a22 * b22 + a23 * b32, a21 * b13 + a22 * b23 + a23 * b33,
         a31 * b11 + a32 * b21 + a33 * b31, a31 * b12 + a32 * b22 + a33 * b32, a31 * b13 + a32 * b23 + a33 * b33,
     ];
+}
+
+/**
+ * 判断两点是否相等
+ * @param p0 点1
+ * @param p1 点2
+ */
+export function pointEq(p0: Point, p1: Point): boolean {
+    return p0[0] === p1[0] && p0[1] === p1[1];
+}
+
+/**
+ * 判断两路径是否相等
+ * @param path0 路径1
+ * @param path1 路径2
+ */
+export function pathEq(path0: Path, path1: Path): boolean {
+    if (path0.length !== path1.length) {
+        return false;
+    }
+    for (let i = 0; i < path0.length; i++) {
+        const [p0, p1] = [path0[i], path1[i]];
+        if (!pointEq(p0, p1)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * 返回两个路径中不同点的下标,若路径长度不一致则抛出错误
+ * @param path0 路径1
+ * @param path1 路径2
+ */
+export function twoPathNotEqPoints(path0: Path, path1: Path): number[] {
+    if (path0.length !== path1.length) {
+        throw new Error('path length is not equal');
+    }
+    const result = [];
+    for (let i = 0; i < path0.length; i++) {
+        const [p0, p1] = [path0[i], path1[i]];
+        if (!pointEq(p0, p1)) {
+            result.push(i);
+        }
+    }
+    return result;
 }

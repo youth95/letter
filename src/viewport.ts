@@ -23,6 +23,16 @@ export class ViewPort {
   private height: number;
   private transformMatrix: TransformMatrix;
   public readonly engine: Engine;
+  public mouseEventHandler: MouseEventHandler = new MouseEventHandler(this);
+  public viewports:ViewPort[] = [];
+
+  public appendViewPort = (viewport: ViewPort) => {
+    this.viewports.push(viewport);
+  };
+
+  public removeAllViewPort = () => {
+    this.viewports = [];
+  }
 
   constructor(options: ViewPortOptions) {
     this.ctx = options.ctx;
@@ -36,7 +46,8 @@ export class ViewPort {
       b, d, f,
     ] = this.transformMatrix;
     this.ctx.setTransform(a, b, c, d, e, f);
-    this.engine = new Engine(this.ctx);
+    this.engine = new Engine(this.ctx,this);
+    this.mouseEventHandler.bind();  // 绑定事件
   }
 
   /**
@@ -77,7 +88,7 @@ export class ViewPort {
    * @param ev 事件名
    * @param p (0,0) 至 (width,height) 的点
    */
-  private transformEvent(ev: EventNames, p: Point): ViewPortMouseEvent {
+  public transformEvent(ev: EventNames, p: Point): ViewPortMouseEvent {
     const np = transform(this.transformMatrix, p);
     return {
       p: np,

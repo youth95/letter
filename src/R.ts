@@ -64,10 +64,14 @@ export function putCircle(circle: Circle): R {
     }
 }
 
-export function putRect(rectPos:RectPos):R{
-    return (ctx:CanvasRenderingContext2D) => {
+export function putRect(rectPos: RectPos, filled: boolean): R {
+    return (ctx: CanvasRenderingContext2D) => {
         ctx.beginPath();
-        ctx.fillRect(...rectPos);
+        if(filled){
+            ctx.fillRect(...rectPos);
+        }else{
+            ctx.strokeRect(...rectPos);
+        }
     }
 }
 

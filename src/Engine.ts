@@ -1,20 +1,26 @@
 import { Shape } from "./shapes/Shape";
 import { ViewPortMouseEvent } from "./handler/MouseEventHandler";
+import { Point } from "./planimetry";
+import { ViewPort } from "./viewport";
 
 /**
  * 渲染引擎
  */
 export class Engine {
 
-    constructor(public ctx: CanvasRenderingContext2D) { }
+    constructor(public ctx: CanvasRenderingContext2D, public readonly viewPort: ViewPort) { }
 
     /**
      * 图形池
      */
     private shapePool: Shape[] = [];
 
-    public getShape(index: number) {
-        return this.shapePool[index];
+    public getShape(zindex: number): Shape {
+        const shape = this.shapePool.find(item => item.zindex === zindex);
+        if (shape === undefined) {
+            throw new Error(`cont found shape by zindex:${zindex}`);
+        }
+        return shape;
     }
 
     public get shapePoolSize() {
@@ -30,7 +36,7 @@ export class Engine {
         shape.setEngine(this);
     }
 
-    public addSome(shapes:Shape[]){
+    public addSome(shapes: Shape[]) {
         shapes.forEach(shape => this.add(shape));
     }
 
@@ -45,7 +51,7 @@ export class Engine {
         }
     }
 
-    public removeSome(shapes:Shape[]){
+    public removeSome(shapes: Shape[]) {
         shapes.forEach(shape => this.remove(shape));
     }
 
@@ -97,10 +103,10 @@ export class Engine {
                     if (shape.isEnter) {
                         vev.action = 'enter';
                         shape.onMouseEnter(vev);
-                    }else if(shape.isLeave){
+                    } else if (shape.isLeave) {
                         vev.action = 'leave';
                         shape.onMouseEnter(vev);
-                    }else if (shape.onMouseMove(vev))
+                    } else if (shape.onMouseMove(vev))
                         continue;
                     else
                         return;
@@ -131,8 +137,21 @@ export class Engine {
         }
     }
 
+    /**
+     * 命中检测，返回所有被命中的shape的zIndex
+     * @param p 检测点
+     */
+    public hitTest(p: Point): number[] {
+        return this.shapePool
+            .map((shape) => [shape.inRegion(p), shape])
+            .filter(item => item[0])
+            .map(item => (item[1] as Shape).zindex);
+    }
 
-    public addHitRegion():void {
-        
+    /**
+     * 移除所有选中的shape
+     */
+    public removeSelected() {
+        this.shapePool.filter(shape => shape.isSelected()).forEach(shape => shape.remove());
     }
 }

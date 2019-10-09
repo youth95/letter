@@ -7,7 +7,7 @@
  */
 
 import { R } from "../R";
-import { Point } from "../planimetry";
+import { Point, copyPath, TransformMatrix, createTransformMatrix, isInPolygon } from "../planimetry";
 import { DefaultMouseEvent } from "../handler/DefaultMouseEvent";
 import { Engine } from "../Engine";
 
@@ -17,6 +17,12 @@ export interface HitAble {
      * @param p 目标点
      */
     inRegion(p: Point): boolean;
+}
+
+export interface SelectedAble {
+    isSelected(): boolean;
+    select(): void;
+    unSelect(): void;
 }
 
 export interface DrawState {
@@ -43,17 +49,18 @@ export interface DrawState {
 
 }
 
-export abstract class Shape extends DefaultMouseEvent implements HitAble {
+export class Shape extends DefaultMouseEvent implements HitAble, SelectedAble {
+
 
     /**
      * 表示当前是否进入了该shape
      */
-    public isEnter:boolean = false;
+    public isEnter: boolean = false;
 
     /**
      * 表示当前是否离开了该shape
      */
-    public isLeave:boolean = false;
+    public isLeave: boolean = false;
 
     /**
      * 自增id
@@ -70,16 +77,30 @@ export abstract class Shape extends DefaultMouseEvent implements HitAble {
      */
     public visable: boolean = true;
 
-    private engine:Engine|null = null;
+    protected engine: Engine | null = null;
 
     public drawState: DrawState | null = null;
 
-    public setEngine(engine:Engine){
+    private selected: boolean = false;
+
+    public transformMatrix: TransformMatrix = createTransformMatrix();
+
+    public isSelected(): boolean {
+        return this.selected;
+    }
+    public select(): void {
+        this.selected = true;
+    }
+    public unSelect(): void {
+        this.selected = false;
+    }
+
+    public setEngine(engine: Engine) {
         this.engine = engine;
     }
 
-    public remove(){
-        if(this.engine){
+    public remove() {
+        if (this.engine) {
             this.engine.remove(this);
         }
     }
@@ -93,6 +114,11 @@ export abstract class Shape extends DefaultMouseEvent implements HitAble {
     }
 
     public renderAfterState: R = (ctx: CanvasRenderingContext2D) => {
+        const [
+            a, c, e,
+            b, d, f,
+        ] = this.transformMatrix
+        ctx.setTransform(a, b, c, d, e, f);
         if (this.drawState) {
             ctx.save();
             this.drawState.direction && (ctx.direction = this.drawState.direction);
@@ -125,24 +151,27 @@ export abstract class Shape extends DefaultMouseEvent implements HitAble {
     /**
      * 渲染函数
      */
-    public abstract render: R;
+    public render: import("../R").R = () => {};
 
-    public abstract inRegion(p: Point): boolean;
+    public inRegion(p: [number, number]): boolean {
+        const isIn = isInPolygon(this.valueOf(), p);
+        return isIn;
+    }
 
-    public inRegionAndSetEnterState(p:Point):boolean{
+    public inRegionAndSetEnterState(p: Point): boolean {
         const isIn = this.inRegion(p);
-        if(isIn){
-            if(!this.isEnter){
+        if (isIn) {
+            if (!this.isEnter) {
                 this.isEnter = true;
                 this.isLeave = false;
             }
-        }else{
-            if(this.isEnter){
+        } else {
+            if (this.isEnter) {
                 this.isEnter = false;
                 this.isLeave = true;
             }
         }
-        
+
         return isIn;
     };
 
@@ -150,25 +179,50 @@ export abstract class Shape extends DefaultMouseEvent implements HitAble {
      * 向上移动
      * @param n 像素量
      */
-    public abstract moveUp(n: number): void;
+    public moveUp(n: number): void {
+        this.setValue(this.valueOf().map(point => [point[0], point[1] + n]));
+    }
 
     /**
      * 向下移动
      * @param n 像素量
      */
-    public abstract moveDown(n: number): void;
+    public moveDown(n: number): void {
+        this.setValue(this.valueOf().map(point => [point[0], point[1] - n]));
+    }
 
     /**
      * 向左移动
      * @param n 像素量
      */
-    public abstract moveLeft(n: number): void;
+    public moveLeft(n: number): void {
+        this.setValue(this.valueOf().map(point => [point[0] + n, point[1]]));
+    }
 
     /**
      * 向右移动
      * @param n 像素量
      */
-    public abstract moveRight(n: number): void;
+    public moveRight(n: number): void {
+        this.setValue(this.valueOf().map(point => [point[0] - n, point[1]]));
+    }
+
+    private value: Point[] = [];
+
+    /**
+     * 设置原始值
+     * @param value 控制点
+     */
+    public setValue(value: Point[]): void {
+        this.value = value;
+    }
+
+    /**
+     * 获取原始值
+     */
+    public valueOf(): Point[] {
+        return copyPath(this.value);
+    };
 }
 
 
