@@ -10,3 +10,4 @@ yarn.lock
 lib/
 @types/
 tmp/
+*.xml

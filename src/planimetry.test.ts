@@ -94,9 +94,9 @@ describe('planimetry', () => {
 
     it('getPointsRect', () => {
         expect(getPointsRect([])).toEqual([0, 0, 0, 0]);
-        expect(getPointsRect([[1, 1]])).toEqual([0, 0, 0, 0]);
-        expect(getPointsRect([[1, 1], [1, 2]])).toEqual([0, 0, 0, 1]);
-        expect(getPointsRect([[1, 1], [-2, 3], [2, -7]])).toEqual([0, 0, 4, 10]);
+        expect(getPointsRect([[1, 1]])).toEqual([1, 1, 0, 0]);
+        expect(getPointsRect([[1, 1], [1, 2]])).toEqual([1, 1, 0, 1]);
+        expect(getPointsRect([[1, 1], [-2, 3], [2, -7]])).toEqual([-2, -7, 4, 10]);
     });
 
     it('isIpsilaterals', () => {

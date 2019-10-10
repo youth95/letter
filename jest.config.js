@@ -1,9 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  "windowOptions": {
-    "runScripts": "dangerously"
-  },
+  "reporters": [ "default", "jest-junit" ],
   collectCoverage: true,
   testEnvironmentOptions: { "resources": "usable" },
   setupFiles: ["jest-canvas-mock"],
