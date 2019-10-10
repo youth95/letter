@@ -1,3 +1,5 @@
+import { Point } from "./planimetry";
+
 export type PureParams = number | string | boolean;
 export type PureFunction = (x: PureParams) => any;
 export type PureNumberFunction = (x: number) => any;
@@ -122,6 +124,37 @@ export function chunk(size: number, arr: any[]) {
   }
   return result;
 }
+
+/**
+ * 生成数组滑窗
+ * @param size 滑窗大小
+ * @param arr 数组
+ * @example
+ * sliding(2,[1]);  // [[1]]
+ * sliding(2,[1,2]);  // [[1,2]]
+ * sliding(2,[1,2,3]);  // [[1,2],[2,3]]
+ * sliding(1,[1,2,3]);  // [[1],[2],[3]]
+ * sliding(0,[1]);  // [[1]]
+ * sliding(0,[1,2,3]);  // [[1,2,3]]
+ * sliding(-1,[1,2,3]);  // [[1,2,3]]
+ * 
+ */
+export function sliding(size: number, arr: any[]):any[][] {
+  if (size <= 0) {
+    return [arr];
+  }
+
+  const result: any[] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    if (i + size < arr.length) {
+      result.push(arr.slice(i, i + size));
+    } else {
+      result.push(arr.slice(i, arr.length - 1));
+      break;
+    }
+  }
+  return result;
+}
 /**
  * 合并4个图像通道为一个图像数据
  * @param channels 通道数据集
@@ -143,7 +176,14 @@ export function mergeColorChannel(channels: colorChannels, width: number): Image
  * @param y 纵坐标
  * @param w 画布宽度
  */
-export function pos2index(x: number, y: number, w: number) { return x + y * w; }
+export function pos2index(x: number, y: number, w: number): number { return x + y * w; }
+
+/**
+ * 通过实际的通道中的下标计算出像素在画布上的横纵坐标
+ * @param i 下标
+ * @param w 画布宽度
+ */
+export function index2pos(i: number, w: number): Point { return [i % w, Math.floor(i / w)]; }
 
 /**
  * 输出一个图像逐行访问的所有下标
@@ -208,3 +248,36 @@ export function isEq(a: any) {
 }
 
 export const eqT = isEq(true);
+
+
+/**
+ * 创建一个canvas绘图对象
+ */
+export const createCanvasContext2d = (width: number = 100, height: number = 100): CanvasRenderingContext2D => {
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (ctx === null) {
+    throw new Error('cont create canvas ctx !');
+  }
+  return ctx;
+}
+
+/**
+ * 合并多个数组
+ * @param arrs 需要合并的数据集
+ * @example
+ * zip([[1,2,3],[4,5,6],[7,8,9]]);  // [[1,4,7],[2,5,8],[3,6,9]]
+ */
+export function zip(arrs:any[][]):any[]{
+  const result = [];
+  for(let i = 0;i<arrs[0].length;i++){
+    const chunk = [];
+    for(let j = 0;j<arrs.length;j++){
+      chunk.push(arrs[j][i]);
+    }
+    result.push(chunk);
+  }
+  return result;
+}

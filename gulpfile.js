@@ -12,10 +12,12 @@ gulp.task("typedoc", function() {
       .src(["src/**/*.ts"])
       .pipe(typedoc({
           module: "commonjs",
-          target: "es5",
+          target: "es6",
           exclude: [
             '**/*.test.ts',
           ],
+          mode:'modules',
+          plugins:['typedoc-plugin-external-module-name'],
           out: "docs/",
           name: "Letter"
       }))
@@ -25,7 +27,7 @@ gulp.task("typedoc", function() {
 const browserifyOptions = {
   basedir: ".",
   debug: true,
-  standalone:'letter',
+  standalone:'L',
   entries: ["src/index.ts"],
   cache: {},
   packageCache: {}

@@ -4,7 +4,7 @@ describe('observer', () => {
   class TestSubject extends Subject<number> {
   }
 
-  class TestObserver extends Observer<number> {
+  class TestObserver implements Observer<number> {
     public state:number|null = null;
     update(nextState: number | null): void {
       this.state = nextState;

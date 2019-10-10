@@ -1,4 +1,5 @@
-import { colorChannel, rowIndex, colIndex, addArrays, mergeColorChannel } from './utils';
+import { colorChannel, rowIndex, colIndex, addArrays, mergeColorChannel, zip, index2pos } from './utils';
+import { Point } from './planimetry';
 
 /**
  * 四通道颜色值
@@ -107,4 +108,17 @@ export function binarization(img: ImageData) {
   const r = addArrays(...colorChannel(img).slice(0, 3)).map(item => item > rp ? 225 : 0);
   return mergeColorChannel([r, r, r, r.map(() => 225)], img.width);
 }
-
+/**
+ * 输出一个图像中所有像素值不等背景像素值的索引
+ * @param img 图像
+ */
+export function getPointsFromImageData(img:ImageData,bgColor:Color = [0,0,0,0]):number[]{
+  const list = zip(colorChannel(img));
+  const result:number[] = [];
+  for(let i = 0;i<list.length;i++){
+    if(list[i][0] !== bgColor[0] || list[i][1] !== bgColor[1] || list[i][2] !== bgColor[2] || list[i][3] !== bgColor[3]){
+      result.push(i);
+    }
+  }
+  return result;
+}
