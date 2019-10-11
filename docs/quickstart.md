@@ -69,3 +69,51 @@ viewPort.engine.ctx.canvas.addEventListener('mousemove', h('move'));
 
 <iframe  src="_examples/example1.html" ></iframe>
 
+
+# 编辑器
+
+letter 中包含一个`Editor`类，是图形编辑器的一个实现。你可以这样使用它。
+
+```javascript
+import { Editor} from 'letter';
+
+const app = new Editor();
+
+// 挂载
+app.mount('root');
+
+// 绑定键盘事件
+window.addEventListener('keydown', (event) => {
+  switch (event.keyCode) {
+    case 76:  // l 画直线
+      app.cleanDrawCanvas();
+      app.drawLine();
+      break;
+    case 83:  // s 选择图形
+      app.cleanDrawCanvas();
+      app.selectShape();
+      break;
+    case 82:  // r 画矩形
+      app.cleanDrawCanvas();
+      app.drawRect();
+      break;
+    case 67:  // c 画圆
+      app.cleanDrawCanvas();
+      app.drawCircle();
+      break;
+    case 8:   // Backspace 删除选中图形
+      app.cleanDrawCanvas();
+      app.removeAllSelected();
+      app.cleanDrawCanvas();
+      break;
+    case 80:  // p 画多边形
+      app.cleanDrawCanvas();
+      app.drawPloygon();
+      break;
+  }
+});
+```
+
+像这样,按下键盘上的`r`键试试?
+
+<iframe height=600 src="_examples/example2.html" ></iframe>
