@@ -69,7 +69,6 @@ viewPort.engine.ctx.canvas.addEventListener('mousemove', h('move'));
 
 <iframe  src="_examples/example1.html" ></iframe>
 
-
 # 编辑器
 
 letter 中包含一个`Editor`类，是图形编辑器的一个实现。你可以这样使用它。
@@ -117,3 +116,4 @@ window.addEventListener('keydown', (event) => {
 像这样,按下键盘上的`r`键试试?
 
 <iframe height=600 src="_examples/example2.html" ></iframe>
+
