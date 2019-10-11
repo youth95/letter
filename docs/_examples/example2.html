@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Example0</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body style="overflow: hidden">
+    <div id="root"></div>
+    <div>
+        <script src="../_lib/letter.min.js"></script>
+        <script>
+            const { Editor } = L;
+
+            const app = new Editor();
+
+            // 挂载
+            app.mount('root');
+
+            // 绑定键盘事件
+            window.addEventListener('keydown', (event) => {
+                switch (event.keyCode) {
+                    case 76:  // l 画直线
+                        app.cleanDrawCanvas();
+                        app.drawLine();
+                        break;
+                    case 83:  // s 选择图形
+                        app.cleanDrawCanvas();
+                        app.selectShape();
+                        break;
+                    case 82:  // r 画矩形
+                        app.cleanDrawCanvas();
+                        app.drawRect();
+                        break;
+                    case 67:  // c 画圆
+                        app.cleanDrawCanvas();
+                        app.drawCircle();
+                        break;
+                    case 8:   // Backspace 删除选中图形
+                        app.cleanDrawCanvas();
+                        app.removeAllSelected();
+                        app.cleanDrawCanvas();
+                        break;
+                    case 80:  // p 画多边形
+                        app.cleanDrawCanvas();
+                        app.drawPloygon();
+                        break;
+                }
+            });
+        </script>
+</body>
+
+</html>
