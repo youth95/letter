@@ -2,9 +2,9 @@
 
 # Letter
 
-> A magical 2D Graphics Library for Browser
+> 一个神奇的2D图形库
 
-* Simple and lightweight 
+* 简单、轻量级
 
-[GitHub](https://github.com/youth95/letter)
-[Get Started](#letter)
+[仓库](https://github.com/youth95/letter)
+[入门](#letter)

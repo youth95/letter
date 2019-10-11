@@ -1,7 +1,7 @@
 - Getting started
 
-  - [快速开始](zh-cn/quickstart.md)
-  - [绘制基本图形](render-base-shape.md)
+  - [Quick start](quickstart.md)
+  - [Writing more pages](more-pages.md)
   - [Custom navbar](custom-navbar.md)
   - [Cover page](cover.md)
 
