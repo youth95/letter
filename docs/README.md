@@ -1,20 +1,9 @@
 # Letter
 
->  简单、轻量级
+>  A magical 2D Graphics Library for Browser
 
-# 是什么
+# What it is
 
-> letter  是一个浏览器上的二维图形库。
+# Features
 
-查看 [快速开始](quickstart.md) 了解详情。
-
-# 特性
-
-* 简单、轻量级
-* 基于控制点的基本模型
-* 支持鼠标事件
-* 支持图形区域检测
-* 支持自定义图形
-* 支持控制点编辑
-
-# 例子
+# Examples
