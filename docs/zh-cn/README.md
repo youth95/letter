@@ -1,12 +1,12 @@
 # Letter
 
->  一个神奇的2D图形库
+>  简单、轻量级
 
-# What it is
+# 是什么
 
-# Features
+> letter  是一个浏览器上的二维图形库。
 
-查看 [快速开始](quickstart.md) 了解详情。
+查看 [快速开始](zh-cn/quickstart.md) 了解详情。
 
 # 特性
 
