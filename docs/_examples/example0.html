@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Example0</title>
+</head>
+<body>
+        <div id="example0"><div>
+        <script src="../_lib/letter.min.js"></script>
+        <script>
+                const { ViewPort,RectShape } = L;
+                // 创建viewPort
+                const viewPort = new ViewPort({
+                    ctx:L.createCanvasContext2d(),
+                    width:100,
+                    height:100,
+                    transformMatrix:L.createTransformMatrix()
+                });
+                // 创建一个图形
+                const rectShape = new RectShape([0,0,50,50]);
+                // 将图形加入渲染引擎
+                viewPort.engine.add(rectShape);
+                // 渲染
+                viewPort.engine.render();
+                // 挂载
+                document.getElementById('example0').appendChild(viewPort.engine.ctx.canvas);
+            </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Example0</title>
+</head>
+
+<body>
+    <div id="example0">
+        <div>
+            <script src="../_lib/letter.min.js"></script>
+            <script>
+                const { ViewPort, RectShape } = L;
+                // 创建viewPort
+                const viewPort = new ViewPort({
+                    ctx: L.createCanvasContext2d(),
+                    width: 100,
+                    height: 100,
+                    transformMatrix: L.createTransformMatrix()
+                });
+                // 创建一个图形
+                const rectShape = new RectShape([0, 0, 50, 50]);
+                // 将图形加入渲染引擎
+                viewPort.engine.add(rectShape);
+                // 渲染
+                viewPort.engine.render();
+                // 挂载
+                document.getElementById('example0').appendChild(viewPort.engine.ctx.canvas);
+                // 覆盖图形事件逻辑
+                rectShape.onMouseDown = function (ev) {
+                    if (this.drawState && this.drawState.strokeStyle === 'red') {
+                        this.drawState = {
+                            strokeStyle: "blue"
+                        };
+                    } else {
+                        this.drawState = {
+                            strokeStyle: "red"
+                        };
+                    }
+                    ev.viewport.engine.render(true);    // 清除并重绘画布
+                }
+
+                // dom事件绑定
+                const h = (ename) => (ev) => {
+                    const offsetLeft = viewPort.engine.ctx.canvas.offsetLeft;
+                    const offsetTop = viewPort.engine.ctx.canvas.offsetTop;
+                    const offsetX = ev.offsetX;
+                    const offsetY = ev.offsetY;
+                    viewPort.trigger([offsetX - offsetLeft, offsetY - offsetTop], ename);
+                };
+                viewPort.engine.ctx.canvas.addEventListener('mousedown', h('down'));
+                viewPort.engine.ctx.canvas.addEventListener('mousemove', h('move'));
+            </script>
+</body>
+
+</html>
