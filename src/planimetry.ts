@@ -27,6 +27,68 @@ export type Circle = [Point, number];
  */
 export type Line = [number, number, number];
 
+
+/**
+ * 限制
+ */
+export interface Limit {
+    upper?: number;
+    lower?: number;
+}
+
+/**
+ * 带有定义域限制的直线, 可用于表示线段、射线
+ */
+export interface LineWithDomain {
+    line: Line,
+    domain?: Limit,
+}
+
+/**
+ * 为一条线加上定义域限制
+ * @param line 
+ * @param domain 
+ * @returns 
+ */
+export function addDomain(line: Line, domain?: Limit): LineWithDomain {
+    return {
+        line,
+        domain
+    }
+}
+
+/**
+ * 判断点的x值是否在直线的定义域内
+ * @param lineWithDomain 直线
+ * @param point 点
+ * @returns 
+ */
+export function isInLineDomain(lineWithDomain: LineWithDomain, point: Point) {
+    let [x] = point;
+    if (!lineWithDomain.domain) {
+        return true
+    }
+
+    const { lower, upper } = lineWithDomain.domain;
+    if (lower === undefined && upper === undefined) {
+        return true
+    }
+
+    if (lower !== undefined && upper === undefined && x >= lower) {
+        return true
+    }
+
+    if (lower === undefined && upper !== undefined && x <= upper) {
+        return true
+    }
+
+    if (lower !== undefined && upper !== undefined && x >= lower && x <= upper) {
+        return true
+    }
+
+    return false
+}
+
 /**
  * 通过两点求一个直线表达式
  * 
@@ -73,6 +135,102 @@ export function isIpsilateral(line: Line, p1: Point, p2: Point) {
 }
 
 /**
+ * 判断两条直线是否平行
+ * @param line1 直线1
+ * @param line2 直线2
+ */
+export function isParallel(line1: Line, line2: Line) {
+    const [a1, b1] = line1;
+    const [a2, b2] = line2;
+    return a1 / b1 === a2 / b2;
+}
+
+/**
+ * 计算直线1与直线2的交点
+ * @param line1 直线1
+ * @param line2 直线2
+ */
+export function calcIntersection(line1: Line, line2: Line): Point {
+    const [a1, b1, c1] = line1;
+    const [a2, b2, c2] = line1;
+
+    if (isParallel(line1, line2)) {
+        throw new Error(`Tow lines are parallel`);
+    }
+
+    let t = b2 * a1 - b1 * a2;
+
+    let x = (b1 * c2 - b2 * c1) / t
+    let y = (a1 * c2 - c1 * a2) / (-t)
+
+    return [x, y]
+
+}
+
+/**
+ * 在具备定义域的情况下, 计算直线1与直线2的交点
+ * @param line1 直线1
+ * @param line2 直线2
+ * @returns 
+ */
+export function calcIntersectionWithDomain(line1: Line | LineWithDomain, line2: Line | LineWithDomain): Point | null {
+    let l1 = Array.isArray(line1) ? addDomain(line1) : line1;
+    let l2 = Array.isArray(line2) ? addDomain(line2) : line2;
+    try {
+        let p = calcIntersection(l1.line, l2.line);
+        if (isInLineDomain(l1, p) && isInLineDomain(l2, p)) {
+            return p
+        } else {
+            return null
+        }
+    } catch (error) {
+        return null
+    }
+}
+
+/**
+ * 判断一个点是否在多边形内或边缘
+ * @param polygon 多边形
+ * @param point 点
+ */
+export function isInPolygon(polygon: Polygon, point: Point): boolean {
+    let isIn = false;
+
+    const [px, py] = point;
+
+    for (var i = 0, l = polygon.length, j = l - 1; i < l; j = i, i++) {
+        var sx = polygon[i][0],
+            sy = polygon[i][1],
+            tx = polygon[j][0],
+            ty = polygon[j][1]
+
+        // 点与多边形顶点重合
+        if ((sx === px && sy === py) || (tx === px && ty === py)) {
+            return true
+        }
+
+        // 判断线段两端点是否在射线两侧
+        if ((sy < py && ty >= py) || (sy >= py && ty < py)) {
+            // 线段上与射线 Y 坐标相同的点的 X 坐标
+            var x = sx + (py - sy) * (tx - sx) / (ty - sy)
+
+            // 点在多边形的边上
+            if (x === px) {
+                return true
+            }
+
+            // 射线穿过多边形的边界
+            if (x > px) {
+                isIn = !isIn
+            }
+        }
+    }
+
+    // 射线穿过多边形边界的次数为奇数时点在多边形内
+    return isIn
+}
+
+/**
  * 判断多个点是否在线的同一侧
  * @param line 线
  * @param ps 点集合
@@ -114,7 +272,7 @@ export function isInTriangle(triangle: Polygon, point: Point): boolean {
  * @param polygon 多边形
  * @param point 点
  */
-export function isInPolygon(polygon: Polygon, point: Point): boolean {
+export function isInConvexPolygon(polygon: Polygon, point: Point): boolean {
     const p = polygon[0];
     for (let i = 1; i < polygon.length - 1; i++) {
         const a = polygon[i];

@@ -48,6 +48,21 @@ describe('planimetry', () => {
             [2, 0],
             [2, -2],
         ], [0, 0])).toEqual(true);
+
+        expect(isInPolygon([
+            [0, 0],
+            [0, 2],
+            [2, 0],
+            [1, 1],
+        ], [1, 0])).toEqual(false);
+
+        expect(isInPolygon([
+            [0, 0],
+            [0, 2],
+            [2, 0],
+            [1, 1],
+        ], [0.5, 1.5])).toEqual(true);
+
         expect(isInPolygon([
             [0, 0],
             [0, 2],
@@ -124,41 +139,41 @@ describe('planimetry', () => {
     });
 
     it('isInRect', () => {
-        expect(isInRect([0,0,10,10],[0,0])).toEqual(true);
-        expect(isInRect([0,0,10,10],[10,10])).toEqual(true);
-        expect(isInRect([0,0,10,10],[11,11])).toEqual(false);
+        expect(isInRect([0, 0, 10, 10], [0, 0])).toEqual(true);
+        expect(isInRect([0, 0, 10, 10], [10, 10])).toEqual(true);
+        expect(isInRect([0, 0, 10, 10], [11, 11])).toEqual(false);
     });
 
-    it('isInRects',() => {
-        const rs:RectPos[] = [
-            [0,0,10,10],
-            [-2,8,10,10],
-            [-3,8,20,20],
+    it('isInRects', () => {
+        const rs: RectPos[] = [
+            [0, 0, 10, 10],
+            [-2, 8, 10, 10],
+            [-3, 8, 20, 20],
         ]
-        expect(isInRects(rs,[0,0])).toEqual(0);
-        expect(isInRects(rs,[10,10])).toEqual(0);
-        expect(isInRects(rs,[11,11])).toEqual(2);
+        expect(isInRects(rs, [0, 0])).toEqual(0);
+        expect(isInRects(rs, [10, 10])).toEqual(0);
+        expect(isInRects(rs, [11, 11])).toEqual(2);
     })
 
-    it('translate',() => {
+    it('translate', () => {
         const m = createTransformMatrix();
-        expect(transform(translate(m,1), [0, 0])).toEqual([1, 0]);
-        expect(transform(translate(m,1,-1), [0, 0])).toEqual([1, -1]);
-        expect(transform(translate(m,1,-1), [0, 0])).toEqual([1, -1]);
-        expect(transform(translate(m,1,-1,12), [0, 0])).toEqual([1, -1]);
+        expect(transform(translate(m, 1), [0, 0])).toEqual([1, 0]);
+        expect(transform(translate(m, 1, -1), [0, 0])).toEqual([1, -1]);
+        expect(transform(translate(m, 1, -1), [0, 0])).toEqual([1, -1]);
+        expect(transform(translate(m, 1, -1, 12), [0, 0])).toEqual([1, -1]);
         expect(transform(translate(m), [-1, 0])).toEqual([-1, 0]);
-        expect(transform(translate(translate(m,-100),100), [0, -1])).toEqual([0, -1]);
-        expect(transform(translate(translate(m,-100),100,200), [0, -1])).toEqual([0, 199]);
+        expect(transform(translate(translate(m, -100), 100), [0, -1])).toEqual([0, -1]);
+        expect(transform(translate(translate(m, -100), 100, 200), [0, -1])).toEqual([0, 199]);
     });
 
-    it('scale',() => {
+    it('scale', () => {
         const m = createTransformMatrix();
-        expect(transform(scale(m,1), [0, 0])).toEqual([0, 0]);
-        expect(transform(scale(m,1,-1), [0, 0])).toEqual([0, 0]);
-        expect(transform(scale(m,1,-1), [0, 0])).toEqual([0, 0]);
-        expect(transform(scale(m,1,-1,12), [0, 0])).toEqual([0, 0]);
+        expect(transform(scale(m, 1), [0, 0])).toEqual([0, 0]);
+        expect(transform(scale(m, 1, -1), [0, 0])).toEqual([0, 0]);
+        expect(transform(scale(m, 1, -1), [0, 0])).toEqual([0, 0]);
+        expect(transform(scale(m, 1, -1, 12), [0, 0])).toEqual([0, 0]);
         expect(transform(scale(m), [-1, 0])).toEqual([-1, 0]);
-        expect(transform(scale(scale(m,-100),100), [0, -1])).toEqual([0, -1]);
-        expect(transform(scale(scale(m,-100),100,200), [0, -1])).toEqual([0, -201]);
+        expect(transform(scale(scale(m, -100), 100), [0, -1])).toEqual([0, -1]);
+        expect(transform(scale(scale(m, -100), 100, 200), [0, -1])).toEqual([0, -201]);
     })
 });
